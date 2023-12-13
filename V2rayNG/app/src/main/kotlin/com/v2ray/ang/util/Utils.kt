@@ -9,10 +9,11 @@ import android.content.ClipData
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration.UI_MODE_NIGHT_MASK
-import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import android.content.res.Configuration.UI_MODE_NIGHT_NO
 import android.net.Uri
 import android.os.Build
 import android.os.LocaleList
+import android.provider.Settings
 import android.util.Log
 import android.util.Patterns
 import android.webkit.URLUtil
@@ -178,7 +179,7 @@ object Utils {
             //CIDR
             if (addr.indexOf("/") > 0) {
                 val arr = addr.split("/")
-                if (arr.count() == 2 && Integer.parseInt(arr[1]) > 0) {
+                if (arr.count() == 2 && Integer.parseInt(arr[1]) > -1) {
                     addr = arr[0]
                 }
             }
@@ -317,6 +318,11 @@ object Utils {
         return extDir.absolutePath
     }
 
+    fun getDeviceIdForXUDPBaseKey(): String {
+        val androidId = Settings.Secure.ANDROID_ID.toByteArray(charset("UTF-8"))
+        return Base64.encodeToString(androidId.copyOf(32), Base64.NO_PADDING.or(Base64.URL_SAFE))
+    }
+
     fun getUrlContext(url: String, timeout: Int): String {
         var result: String
         var conn: HttpURLConnection? = null
@@ -356,7 +362,7 @@ object Utils {
 
     fun getDarkModeStatus(context: Context): Boolean {
         val mode = context.resources.configuration.uiMode and UI_MODE_NIGHT_MASK
-        return mode == UI_MODE_NIGHT_YES
+        return mode != UI_MODE_NIGHT_NO
     }
 
     fun getIpv6Address(address: String): String {
